@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, TouchableOpacity, Image, Alert, Text } from "react-native";
+import { useNavigation } from '@react-navigation/native';  // Importa navigation
 import styles from "./style";
 
 import { auth } from "../../firebaseConfig"; // certifique-se de que esse caminho está correto
@@ -9,6 +10,7 @@ import {
 } from "firebase/auth";
 
 export default function FormLogin() {
+  const navigation = useNavigation();  // Hook para navegação
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
@@ -23,6 +25,8 @@ export default function FormLogin() {
       const user = userCredential.user;
       console.log("Usuário logado:", user.email);
       Alert.alert("Sucesso", `Bem-vindo, ${user.email}`);
+      
+      navigation.replace("Home");  // Navega para a tela Home
     } catch (error) {
       console.log("Erro ao logar:", error.message);
       Alert.alert("Erro ao logar", error.message);
@@ -48,8 +52,8 @@ export default function FormLogin() {
 
   return (
     <View style={styles.boxLogin}>
-      <Image 
-        source={{ uri: 'https://drive.google.com/uc?export=view&id=1ojBFKyG6f63wW8iI6QMYEHuY84GUOHcM' }}
+      <Image
+        source={require("../../assets/logo2.png")} // Caminho relativo da imagem
         style={styles.logo}
       />
       <TextInput
@@ -66,7 +70,7 @@ export default function FormLogin() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry={true}
-         placeholderTextColor="#888" 
+        placeholderTextColor="#888" 
       />
       <View style={styles.buttonRow}>
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
