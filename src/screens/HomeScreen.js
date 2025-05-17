@@ -1,3 +1,4 @@
+// HomeScreen.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -32,7 +33,14 @@ export default function HomeScreen() {
   const [emailUsuario, setEmailUsuario] = useState(null);
   const [agendamentosUsuario, setAgendamentosUsuario] = useState([]);
   const [registroUsuario, setRegistroUsuario] = useState(null);
-  const [nomeCliente, setNomeCliente] = useState(""); // novo estado para o nome do cliente
+  const [nomeCliente, setNomeCliente] = useState("");
+  const [horaSelecionada, setHoraSelecionada] = useState(null);
+
+  const horariosDisponiveis = [
+    "09:00", "10:00", "11:00", "12:00",
+    "13:00", "14:00", "15:00", "16:00",
+    "17:00"
+  ];
 
   useEffect(() => {
     const auth = getAuth();
@@ -44,7 +52,6 @@ export default function HomeScreen() {
     return unsubscribe;
   }, []);
 
-  // Função para buscar agendamentos futuros do usuário
   const buscarAgendamentosFuturos = async () => {
     if (!emailUsuario) return;
 
@@ -111,7 +118,8 @@ export default function HomeScreen() {
 
   const abrirModal = () => setModalVisible(true);
   const fecharModal = () => {
-    setNomeCliente(""); // limpa o campo ao fechar modal
+    setNomeCliente("");
+    setHoraSelecionada(null);
     setModalVisible(false);
   };
 
@@ -126,12 +134,17 @@ export default function HomeScreen() {
       return;
     }
 
+    if (!horaSelecionada) {
+      Alert.alert("Erro", "Por favor, selecione um horário.");
+      return;
+    }
+
     const dataStr = dataSelecionada.toISOString().split("T")[0];
 
     try {
       await addDoc(collection(db, "agendamentos"), {
         data: dataStr,
-        hora: "dia todo",
+        hora: horaSelecionada,
         tatuador: emailUsuario,
         nomeCliente: nomeCliente.trim(),
         criadoEm: new Date(),
@@ -152,7 +165,6 @@ export default function HomeScreen() {
       Alert.alert("Sucesso", "Agendamento excluído.");
       setRegistroUsuario(null);
       setDisponivel(true);
-      // Atualiza lista após exclusão
       buscarAgendamentosFuturos();
     } catch (error) {
       console.error("Erro ao excluir:", error);
@@ -170,10 +182,9 @@ export default function HomeScreen() {
           data={agendamentosUsuario}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-         <Text style={styles.agendamentoItem}>
-    📅 {item.data.split('-').reverse().join('/')} - Cliente: {item.nomeCliente}
-    </Text>
-
+            <Text style={styles.agendamentoItem}>
+              📅 {item.data.split("-").reverse().join("/")} às {item.hora} - Cliente: {item.nomeCliente}
+            </Text>
           )}
           style={{ marginBottom: 20, maxHeight: 150 }}
         />
@@ -249,6 +260,33 @@ export default function HomeScreen() {
               placeholder="Digite o nome do cliente"
               value={nomeCliente}
               onChangeText={setNomeCliente}
+            />
+
+            <Text style={styles.label}>Escolha um horário:</Text>
+            <FlatList
+              data={horariosDisponiveis}
+              keyExtractor={(item) => item}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.horaItem,
+                    horaSelecionada === item && styles.horaItemSelecionado,
+                  ]}
+                  onPress={() => setHoraSelecionada(item)}
+                >
+                  <Text
+                    style={[
+                      styles.horaTexto,
+                      horaSelecionada === item && styles.horaTextoSelecionado,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              style={{ marginBottom: 20 }}
             />
 
             <View style={styles.buttonsRow}>
@@ -357,5 +395,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: Platform.OS === "ios" ? 12 : 8,
     marginBottom: 15,
+  },
+  horaItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "#eee",
+    borderRadius: 6,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  horaItemSelecionado: {
+    backgroundColor: "#27ae60",
+    borderColor: "#1e8449",
+  },
+  horaTexto: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  horaTextoSelecionado: {
+    color: "white",
+    fontWeight: "bold",
   },
 });
