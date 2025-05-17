@@ -217,8 +217,6 @@ export default function HomeScreen() {
 
     return (       
       <View style={styles.container}>
-        <Text style={styles.title}>Agendamento de Macas</Text>
-
         <Text style={styles.subtitle}>Seus Agendamentos Futuros:</Text>
         {agendamentosUsuario.length > 0 ? (
           <FlatList
@@ -397,25 +395,24 @@ export default function HomeScreen() {
     );
   }
 
-  return (
+ return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+        tabBarIcon: ({ color, size }) => {
+          let iconName = "home";
 
           if (route.name === "Agendamentos") {
-            iconName = focused ? "calendar" : "calendar-outline";
-          } else if (route.name === "Finanças") {
-            iconName = focused ? "wallet" : "wallet-outline";
+            iconName = "calendar";
+          } else if (route.name === "Financeiro") {
+            iconName = "cash";
           } else if (route.name === "Pagamentos") {
-            iconName = focused ? "card" : "card-outline";
+            iconName = "card";
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#27ae60",
         tabBarInactiveTintColor: "gray",
-        headerShown: false,
       })}
     >
       <Tab.Screen name="Agendamentos" component={Agendamentos} />
