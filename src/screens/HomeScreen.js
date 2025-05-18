@@ -22,12 +22,15 @@ import {
   getDocs,
   addDoc,
   deleteDoc,
+  updateDoc,
+  orderBy,
   doc,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import FinanceScreen from './FinanceScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -80,12 +83,14 @@ export default function HomeScreen() {
 
       try {
         const snapshot = await getDocs(
-          query(
+        query(
             collection(db, "agendamentos"),
             where("tatuador", "==", emailUsuario),
-            where("data", ">=", hojeStr)
-          )
+            where("finalizado", "==", false),  // Só os não finalizados
+            orderBy("data", "asc")
+        )
         );
+
 
         const dados = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -106,7 +111,9 @@ export default function HomeScreen() {
       const verificarDisponibilidade = async () => {
         if (!emailUsuario) return;
 
-        const dataStr = dataSelecionada.toISOString().split("T")[0];
+        dataSelecionada.setHours(0, 0, 0, 0);
+        const dataStr = formatarDataLocal(dataSelecionada);
+
 
         try {
           const snapshot = await getDocs(
@@ -145,6 +152,13 @@ export default function HomeScreen() {
       setModalVisible(false);
     };
 
+       const formatarDataLocal = (data) => {
+        const ano = data.getFullYear();
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const dia = String(data.getDate()).padStart(2, '0');
+        return `${ano}-${mes}-${dia}`;
+        };
+
     const confirmarAgendamento = async () => {
       if (!emailUsuario) {
         Alert.alert("Erro", "Usuário não autenticado.");
@@ -177,6 +191,7 @@ export default function HomeScreen() {
           tatuador: emailUsuario,
           nomeCliente: nomeCliente.trim(),
           preco: precoNumero,
+          finalizado: false,
           criadoEm: new Date(),
         });
 
@@ -217,45 +232,95 @@ export default function HomeScreen() {
 
     return (       
       <View style={styles.container}>
-        <Text style={styles.subtitle}>Seus Agendamentos Futuros:</Text>
         {agendamentosUsuario.length > 0 ? (
-          <FlatList
-            data={agendamentosUsuario}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.cardAgendamento}>
-                <View style={styles.linhaInfo}>
-                  <Ionicons name="calendar" size={16} color="#666" />
-                  <Text style={styles.textoInfo}>
-                    {item.data.split("-").reverse().join("/")}
-                  </Text>
-                  <Ionicons
-                    name="time"
-                    size={16}
-                    color="#666"
-                    style={{ marginLeft: 10 }}
-                  />
-                  <Text style={styles.textoInfo}>{item.hora}</Text>
-                </View>
-                <Text style={styles.nomeCliente}>{item.nomeCliente}</Text>
-                {item.preco !== undefined && (
-                  <Text style={styles.preco}>
-                    Preço: R$ {Number(item.preco).toFixed(2)}
-                  </Text>
-                )}
-                <TouchableOpacity
-                  onPress={() => handleExcluir(item.id)}
-                  style={styles.botaoExcluir}
-                >
-                  <Ionicons name="trash" size={20} color="#c0392b" />
-                </TouchableOpacity>
-              </View>
-            )}
-            style={{ marginBottom: 20, maxHeight: 180 }}
-          />
+        <FlatList
+  data={agendamentosUsuario}
+  keyExtractor={(item) => item.id}
+renderItem={({ item }) => {
+  const hoje = new Date();
+  const dataAgendamento = new Date(item.data + "T00:00:00");
+  const agendamentoPassado = dataAgendamento < hoje;
+
+ const confirmarAtendimento = async () => {
+  try {
+    // Salva nas finanças do tatuador
+    await addDoc(collection(db, "financas"), {
+      data: item.data,
+      valor: item.preco || 0,
+      cliente: item.nomeCliente,
+      tatuador: emailUsuario,
+      registradoEm: new Date(),
+    });
+
+    // Atualiza o agendamento para marcar como finalizado
+    await updateDoc(doc(db, "agendamentos", item.id), {
+      finalizado: true,
+      finalizadoEm: new Date(),
+    });
+
+    Alert.alert("Sucesso", "Atendimento confirmado e adicionado às finanças.");
+    buscarAgendamentosFuturos();
+  } catch (err) {
+    console.error("Erro ao confirmar atendimento:", err);
+    Alert.alert("Erro", "Não foi possível confirmar o atendimento.");
+  }
+};
+
+
+  return (
+    <View style={styles.cardAgendamento}>
+      <View style={styles.linhaInfo}>
+        <Ionicons name="calendar" size={16} color="#666" />
+        <Text style={styles.textoInfo}>
+          {item.data.split("-").reverse().join("/")}
+        </Text>
+        <Ionicons
+          name="time"
+          size={16}
+          color="#666"
+          style={{ marginLeft: 10 }}
+        />
+        <Text style={styles.textoInfo}>{item.hora}</Text>
+      </View>
+      <Text style={styles.nomeCliente}>{item.nomeCliente}</Text>
+      {item.preco !== undefined && (
+        <Text style={styles.preco}>
+          Preço: R$ {Number(item.preco).toFixed(2)}
+        </Text>
+      )}
+
+      {agendamentoPassado ? (
+        <TouchableOpacity
+          onPress={confirmarAtendimento}
+          style={{
+            backgroundColor: "#27ae60",
+            padding: 10,
+            marginTop: 10,
+            borderRadius: 6,
+          }}
+        >
+          <Text style={{ color: "#fff", textAlign: "center", fontWeight: "600" }}>
+            Confirmar atendimento?
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          onPress={() => handleExcluir(item.id)}
+          style={styles.botaoExcluir}
+        >
+          <Ionicons name="trash" size={20} color="#c0392b" />
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}}
+
+  style={{ marginBottom: 20, maxHeight: 200 }}
+/>
+
         ) : (
-          <Text style={{ fontStyle: "italic", marginBottom: 20 }}>
-            Nenhum agendamento futuro encontrado.
+          <Text style={{ fontStyle: "italic", marginBottom: 20, textAlign:'center' }}>
+            Nenhum agendamento encontrado.
           </Text>
         )}
 
@@ -416,7 +481,7 @@ export default function HomeScreen() {
       })}
     >
       <Tab.Screen name="Agendamentos" component={Agendamentos} />
-      <Tab.Screen name="Finanças" component={Financeiro} />
+      <Tab.Screen name="Finanças" component={FinanceScreen} />
       <Tab.Screen name="Pagamentos" component={Pagamentos} />
     </Tab.Navigator>
   );
@@ -426,7 +491,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop:
-      Platform.OS === "android" ? StatusBar.currentHeight + 10 : 40,
+      Platform.OS === "android" ? StatusBar.currentHeight + 10 : 10,
     paddingHorizontal: 20,
     backgroundColor: "#f4f4f4",
   },
