@@ -400,7 +400,7 @@ renderItem={({ item }) => {
                 placeholder="Digite o preço"
                 value={preco}
                 onChangeText={setPreco}
-                keyboardType="numeric"
+                keyboardType="default"
               />
 
               <Text style={styles.label}>Escolha um horário:</Text>
@@ -455,7 +455,7 @@ renderItem={({ item }) => {
   function Pagamentos() {
     return (
       <View style={styles.container}>
-        <Text>Pagamentos da Mensalidade - Em construção</Text>
+        <Text>EM DESENVOLVIMENTO</Text>
       </View>
     );
   }
