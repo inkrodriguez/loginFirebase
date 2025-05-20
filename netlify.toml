@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "web-build"
+
+[dev]
+  command = "expo start --web"
+  port = 19006
+
+[build.environment]
+  EXPO_PUBLIC_URL = "/"
