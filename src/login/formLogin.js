@@ -26,7 +26,12 @@ export default function FormLogin() {
       console.log("Usuário logado:", user.email);
       Alert.alert("Sucesso", `Bem-vindo, ${user.email}`);
       
-      navigation.replace("Home");  // Navega para a tela Home
+      if (user.email === "admin@estudioshodo.com") {
+        navigation.replace("PainelAdm");
+      } else {
+        navigation.replace("Home");
+      }
+
     } catch (error) {
       console.log("Erro ao logar:", error.message);
       Alert.alert("Erro ao logar", error.message);

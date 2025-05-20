@@ -1,13 +1,18 @@
 {
   "expo": {
-    "name": "loginFirebase",
-    "slug": "loginFirebase",
+    "name": "estudioshodo",
+    "slug": "estudioshodo",
+    "owner": "estudioshodo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -25,6 +30,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "21a7897e-9cac-4b65-a82f-5797675450b4"
+      }
     }
   }
 }
