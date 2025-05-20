@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 export default function FinanceScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>EM DESENVOLVIMENTO</Text>
+      <Text style={styles.text}>EM DESENVOLVIMENTO..</Text>
       {/* Em breve: resumo financeiro */}
     </View>
   );
