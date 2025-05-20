@@ -455,7 +455,7 @@ renderItem={({ item }) => {
   function Pagamentos() {
     return (
       <View style={styles.container}>
-        <Text>EM DESENVOLVIMENTO</Text>
+        <Text>EM DESENVOLVIMENTO...</Text>
       </View>
     );
   }
