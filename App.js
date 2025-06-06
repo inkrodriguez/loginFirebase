@@ -4,17 +4,20 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PaperProvider } from 'react-native-paper';
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebaseConfig"; // ajuste esse caminho conforme seu projeto
+import { auth } from "./firebaseConfig";
 
 import FormLogin from "./src/login/formLogin";
-import HomeScreen from "./src/screens/HomeScreen";
 import PainelAdm from "./src/screens/PainelAdm";
+import Loja from "./src/screens/Loja";
+import HomeScreen from "./src/screens/HomeScreen";
+import Tabs from "./src/screens/Tabs";
 import styles from "./src/login/style";
 
 const Stack = createNativeStackNavigator();
 
 function LoginScreenWrapper() {
   return (
+    
     <View style={styles.container}>
       <FormLogin />
     </View>
@@ -40,10 +43,11 @@ export default function App() {
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Login" component={LoginScreenWrapper} />
+            <Stack.Screen name="Loja" component={Loja} />
             {isAdmin ? (
               <Stack.Screen name="PainelAdm" component={PainelAdm} />
             ) : (
-              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Home" component={Tabs} />
             )}
           </Stack.Navigator>
         </NavigationContainer>

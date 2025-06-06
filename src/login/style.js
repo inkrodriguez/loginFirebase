@@ -25,6 +25,14 @@ export default StyleSheet.create({
     marginTop: 10,
     width: "48%",
   },
+    buttonLoja: {
+    backgroundColor: "#9B111E",
+    padding: 12,
+    borderRadius: 6,
+    alignItems: "center",
+    marginTop: 10,
+    width: "100%",
+  },
   buttonLogout: {
     backgroundColor: "red",
     padding: 12,

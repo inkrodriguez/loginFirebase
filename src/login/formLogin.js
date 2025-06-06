@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { View, TextInput, TouchableOpacity, Image, Alert, Text } from "react-native";
-import { useNavigation } from '@react-navigation/native';  // Importa navigation
+import { useNavigation } from '@react-navigation/native';
 import styles from "./style";
 
-import { auth } from "../../firebaseConfig"; // certifique-se de que esse caminho está correto
+import { auth } from "../../firebaseConfig";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 
 export default function FormLogin() {
-  const navigation = useNavigation();  // Hook para navegação
+  const navigation = useNavigation();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
@@ -58,7 +58,7 @@ export default function FormLogin() {
   return (
     <View style={styles.boxLogin}>
       <Image
-        source={require("../../assets/logo2.png")} // Caminho relativo da imagem
+        source={require("../../assets/logo2.png")}
         style={styles.logo}
       />
       <TextInput
@@ -85,6 +85,14 @@ export default function FormLogin() {
           <Text style={styles.textButton}>Cadastre-se</Text>
         </TouchableOpacity> 
       </View>
+
+      {/* Botão para ir para Loja */}
+      <TouchableOpacity
+        style={[styles.buttonLoja, { marginTop: 20, backgroundColor: '#444' }]}
+        onPress={() => navigation.navigate('Loja')}
+      >
+        <Text style={styles.textButton}>Ir para Loja</Text>
+      </TouchableOpacity>
     </View>
   );
 }
